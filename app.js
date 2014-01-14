@@ -37,7 +37,7 @@ app.get('/register', routes.register);
 app.post('/register', routes.register);
 app.get('/login', routes.login);
 app.post('/login', routes.login);
-app.post('/logout', routes.logout);
+app.get('/logout', routes.logout);
 app.post('/add_message', routes.add_message)
 
 app.get('/:username/follow', routes.follow);
