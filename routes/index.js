@@ -19,7 +19,7 @@ function get_user_by_username(username, callback) {
 }
 function get_user_by_username_and_password(username, password, callback) {
   mongodb.db.collection('user')
-    .find({ username: username, password: generate_hash_password(password) }, ['username', 'email', '_id', 'followings'])
+    .find({ username: username, password: generate_hash_password(password) })
     .limit(1)
     .toArray(callback);
 }
@@ -31,24 +31,16 @@ function get_followings(username, callback) {
 }
 function get_user_messages(username, others, callback) {
   others.push(username);
-  mongodb.db.collection('user')
-    .aggregate(
-      { $match: { username :  { $in: others } } },
-      { $unwind: '$messages' },
-      { $sort : { 'messages.date' : -1 } },
-      { $project: { 'text': '$messages.text', 'author' : '$username', 'date': '$messages.date' } },
-      callback
-  );
+  mongodb.db.collection('message')
+    .find({ username: { $in: others}}).sort({ date: -1 })
+    .toArray(callback);
 }
 function get_all_messages(callback) {
-  mongodb.db.collection('user')
-    .aggregate(
-      { $unwind: '$messages' },
-      { $sort : { 'messages.date' : -1 } },
-      { $limit: 10 },
-      { $project: { 'text': '$messages.text', 'author' : '$username', 'date': '$messages.date' } },
-      callback
-  );
+  mongodb.db.collection('message')
+    .find()
+    .sort({ date: -1 })
+    .limit(10)
+    .toArray(callback);
 }
 
 exports.index = function(req, res) {
@@ -56,7 +48,7 @@ exports.index = function(req, res) {
     return res.redirect('/public');
   }
   get_followings(req.session.user.username, function(err, data) {
-    if (err) throw err; 
+    if (err) throw err;
     get_user_messages(req.session.user.username, data[0].followings, function(err, messages) {
       if (err) throw err;
       res.render('timeline', { messages: messages });
@@ -82,7 +74,6 @@ exports.user = function(req, res) {
 
     get_followings(username, function(err, data) {
       if(err) throw err;
-      console.log(data);
       get_user_messages(username, data[0].followings, function(err, messages) {
         if (err) throw err;
         var isFollowing = req.session.user && (req.session.user.followings.indexOf(username) != -1);
@@ -109,13 +100,13 @@ exports.register = function(req, res) {
     }
     if (Object.keys(error).length == 0) {
       get_user_by_username(req.body.username, function(err, data) {
-        console.log(err, data);
         if (err) throw err;
         if (data.length > 0) { return res.render('register', { errors: { username: 'The username is already taken' } } ); }
         mongodb.db.collection('user').insert({
           username: req.body.username,
           password: generate_hash_password(req.body.password),
-          email: req.body.email
+          email: req.body.email,
+          followings: []
         }, function(err, data) {
           if (err) throw err;
           res.redirect('/login');
@@ -151,11 +142,12 @@ exports.add_message = function(req, res) {
     return res.redirect('/login');
   }
   if (req.body.message) {
-    mongodb.db.collection('user')
-      .update(
-        { username : req.session.user.username },
-        { $push: { messages: { text: req.body.message, date: (new Date()) } } },
-        function(err, data) {
+    mongodb.db.collection('message')
+      .insert({
+        text: req.body.message,
+        date: (new Date()),
+        username: req.session.user.username
+      }, function(err, data) {
           if (err) throw err;
     });
   }
