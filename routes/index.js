@@ -187,3 +187,8 @@ exports.unfollow = function(req, res) {
     .splice(req.session.user.followings.indexOf(username), 1);
   res.redirect('/' + username);
 }
+
+exports.notfound404 = function(req, res) {
+  res.status(404);
+  res.render('404');
+}

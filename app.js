@@ -18,8 +18,8 @@ app.configure(function() {
     next();
   });
 
-  app.use(app.router);
   app.use('/public', express.static(__dirname + '/public'));
+  app.use(app.router);
 });
 app.configure('development', function(){
   app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
@@ -43,6 +43,7 @@ app.post('/add_message', routes.add_message)
 app.get('/:username/follow', routes.follow);
 app.get('/:username/unfollow', routes.unfollow);
 
+app.get('/404', routes.notfound404);
 app.get('/:username', routes.user);
 
 app.listen(3000, function() {
