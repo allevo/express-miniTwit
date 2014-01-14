@@ -1,0 +1,9 @@
+#messages {
+  width: 500px;
+  margin: auto;
+}
+
+#messages .info * {
+  font-size: 10px;
+  color: #808080;
+}

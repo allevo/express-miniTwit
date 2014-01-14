@@ -1,0 +1,14 @@
+doctype
+html(lang="en")
+  head
+    link(href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css", rel="stylesheet")
+    block head
+  body
+    if (session.user)
+        a(href='/logout') Logout
+        div Hi #{session.user.username}
+    else
+        a(href='/login') Login
+        a(href='/register') Signup
+
+    block content

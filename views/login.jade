@@ -1,0 +1,12 @@
+extends layout
+block content
+  div.container
+    form(action='/login',method='POST', role='form')
+      div.form-group
+        label(for='username') Username
+        input#username.form-control(name='username')
+      div.form-group
+        label(for='password') Password
+        input#password.form-control(name='password', type='password')
+        span #{error}
+      input#submit.btn.btn-default(type='submit')

@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  if (session.user)
+    if (!other || (other.username == session.user.username))
+      form(action='/add_message', role='form', method='POST')
+        div.form-group
+          input#message.form-control(name='message')
+        input#submit.btn.btn-default(type='submit')
+    else
+      if other.following
+        a(href='/#{other.username}/unfollow') Unfollow
+      else
+        a(href='/#{other.username}/follow') Follow
+  else
+    div Unlogged
+
+  div#messages
+    each message in messages
+      div.message
+        div.text #{message.text}
+        div.info.row
+          div.date.col-md-4 #{message.date}
+          div.author.col-md-4.col-md-offset-4 #{message.author}
+
+block head
+  link(href="/public/timeline.css", rel="stylesheet")
